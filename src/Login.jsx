@@ -70,9 +70,47 @@ export default function Login({ onLogin }) {
     if (!isEmailValid || !isPasswordValid) return;
 
     if (email === 'admin@sasisopa.com' && password === '12345678' && currentMfa === '123456') {
-      onLogin('superadmin');
+      onLogin('superadmin', 'admin@sasisopa.com');
+    } else if (email === 'auditor@sasisopa.com' && password === '1234567' && currentMfa === '123456') {
+      onLogin('Auditor', 'auditor@sasisopa.com');
+    } else if (email === 'owner@sasisopa.com' && password === '1234567' && currentMfa === '123456') {
+      onLogin('Owner', 'owner@sasisopa.com');
+    } else if (email === 'responsablesspa@sasisopa.com' && password === '1234567' && currentMfa === '123456') {
+      onLogin('responsable_sspa', 'responsablesspa@sasisopa.com');
     } else {
-      setError('Credenciales incorrectas. Verifica tu correo, contraseña o código MFA.');
+      setError('Credenciales incorrectas. Usa responsablesspa@sasisopa.com (1234567 / 123456), auditor@sasisopa.com (1234567 / 123456), owner@sasisopa.com (1234567 / 123456) o admin@sasisopa.com (12345678 / 123456).');
+    }
+  };
+
+  const fillCredentials = (type) => {
+    if (type === 'responsable_sspa') {
+      setEmail('responsablesspa@sasisopa.com');
+      setPassword('1234567');
+      setMfaCode(['1', '2', '3', '4', '5', '6']);
+      setEmailError('');
+      setPasswordError('');
+      setError('');
+    } else if (type === 'auditor') {
+      setEmail('auditor@sasisopa.com');
+      setPassword('1234567');
+      setMfaCode(['1', '2', '3', '4', '5', '6']);
+      setEmailError('');
+      setPasswordError('');
+      setError('');
+    } else if (type === 'owner') {
+      setEmail('owner@sasisopa.com');
+      setPassword('1234567');
+      setMfaCode(['1', '2', '3', '4', '5', '6']);
+      setEmailError('');
+      setPasswordError('');
+      setError('');
+    } else {
+      setEmail('admin@sasisopa.com');
+      setPassword('12345678');
+      setMfaCode(['1', '2', '3', '4', '5', '6']);
+      setEmailError('');
+      setPasswordError('');
+      setError('');
     }
   };
 
@@ -158,6 +196,121 @@ export default function Login({ onLogin }) {
               {error}
             </div>
           )}
+
+          {/* Selector Rápido de Credenciales Demo (4 Cuentas Separadas) */}
+          <div className="mb-5 p-3.5 rounded-2xl bg-[#F0F8FC] border border-[#1C6E8C]/20 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-mono-label text-[10px] uppercase font-bold text-[#1C6E8C] block">
+                Accesos Rápidos Demo (Cuentas por Rol):
+              </span>
+              <span className="font-mono-label text-[9px] text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full font-bold">
+                Rol Activo: Responsable SSPA
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              
+              {/* 1. RESPONSABLE SSPA (OPERATIVO) */}
+              <button
+                type="button"
+                onClick={() => fillCredentials('responsable_sspa')}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#E2F3FF] border-2 border-[#1C6E8C]/40 text-left transition-all group shadow-2xs relative"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#1C6E8C] animate-pulse"></span>
+                    <span className="font-heading font-bold text-[12px] text-[#0C2B3A] group-hover:text-[#1C6E8C]">
+                      Resp. SSPA
+                    </span>
+                  </div>
+                  <span className="font-mono-label text-[8px] font-bold text-[#1C6E8C] bg-[#E2F3FF] px-1.5 py-0.5 rounded">
+                    Operativo
+                  </span>
+                </div>
+                <span className="font-mono-label text-[9.5px] text-[#374151] block mt-1 truncate font-medium">
+                  responsablesspa@sasisopa.com
+                </span>
+                <span className="font-mono-label text-[8.5px] text-[#6B7280] block">
+                  1234567 • MFA 123456
+                </span>
+              </button>
+
+              {/* 2. AUDITOR */}
+              <button
+                type="button"
+                onClick={() => fillCredentials('auditor')}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#E8F8F0] border border-[#0F766E]/30 text-left transition-all group shadow-2xs"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#0F766E]"></span>
+                    <span className="font-heading font-bold text-[12px] text-[#0C2B3A] group-hover:text-[#0F766E]">
+                      Auditor
+                    </span>
+                  </div>
+                  <span className="font-mono-label text-[8px] font-bold text-[#0F766E] bg-[#E8F8F0] px-1.5 py-0.5 rounded">
+                    Solo Lectura
+                  </span>
+                </div>
+                <span className="font-mono-label text-[9.5px] text-[#374151] block mt-1 truncate font-medium">
+                  auditor@sasisopa.com
+                </span>
+                <span className="font-mono-label text-[8.5px] text-[#6B7280] block">
+                  1234567 • MFA 123456
+                </span>
+              </button>
+
+              {/* 3. OWNER */}
+              <button
+                type="button"
+                onClick={() => fillCredentials('owner')}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#FFF9EB] border border-[#8A5A00]/30 text-left transition-all group shadow-2xs"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#8A5A00]"></span>
+                    <span className="font-heading font-bold text-[12px] text-[#0C2B3A] group-hover:text-[#8A5A00]">
+                      Owner
+                    </span>
+                  </div>
+                  <span className="font-mono-label text-[8px] font-bold text-[#8A5A00] bg-[#FFF9EB] px-1.5 py-0.5 rounded">
+                    Acceso Total
+                  </span>
+                </div>
+                <span className="font-mono-label text-[9.5px] text-[#374151] block mt-1 truncate font-medium">
+                  owner@sasisopa.com
+                </span>
+                <span className="font-mono-label text-[8.5px] text-[#6B7280] block">
+                  1234567 • MFA 123456
+                </span>
+              </button>
+
+              {/* 4. SUPERADMIN */}
+              <button
+                type="button"
+                onClick={() => fillCredentials('superadmin')}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#E2F3FF] border border-[#0284C7]/30 text-left transition-all group shadow-2xs"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#0284C7]"></span>
+                    <span className="font-heading font-bold text-[12px] text-[#0C2B3A] group-hover:text-[#0284C7]">
+                      SuperAdmin
+                    </span>
+                  </div>
+                  <span className="font-mono-label text-[8px] font-bold text-[#0284C7] bg-[#E0F2FE] px-1.5 py-0.5 rounded">
+                    Control Total
+                  </span>
+                </div>
+                <span className="font-mono-label text-[9.5px] text-[#374151] block mt-1 truncate font-medium">
+                  admin@sasisopa.com
+                </span>
+                <span className="font-mono-label text-[8.5px] text-[#6B7280] block">
+                  12345678 • MFA 123456
+                </span>
+              </button>
+
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             

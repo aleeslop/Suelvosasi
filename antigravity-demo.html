@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Efectos Antigravedad: Scroll & Menú con Indicador Flotante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============================================================== */
+    /* 0. VARIABLES Y CONFIGURACIÓN BASE                            */
+    /* ============================================================== */
+    :root {
+      /* Curva elástica y suave característica de Antigravedad */
+      --ease-antigravity: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-scroll: 0.9s;
+      --duration-indicator: 0.55s;
+
+      /* Paleta de color premium */
+      --bg-page: #0C1E28;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --text-primary: #F1F5F7;
+      --text-muted: #8EA4B0;
+      --accent: #4FB3D9;
+      --accent-glow: rgba(79, 179, 217, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 120px;
+    }
+
+    /* ============================================================== */
+    /* 1. EFECTO 2: MENÚ DE NAVEGACIÓN CON INDICADOR FLOTANTE        */
+    /* ============================================================== */
+    .nav-wrapper {
+      position: sticky;
+      top: 20px;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+    }
+
+    .floating-nav {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(14, 34, 46, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      padding: 6px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+      /* Optimización GPU */
+      contain: layout paint;
+    }
+
+    /* El indicador de fondo estilo píldora */
+    .nav-indicator {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 0;
+      background: linear-gradient(135deg, #1C6E8C 0%, #135166 100%);
+      border: 1px solid rgba(79, 179, 217, 0.4);
+      border-radius: 9999px;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      pointer-events: none;
+      z-index: 1;
+
+      /* Transición fluida con cubic-bezier antigravedad */
+      transition: 
+        transform var(--duration-indicator) var(--ease-antigravity),
+        width var(--duration-indicator) var(--ease-antigravity);
+      
+      /* Optimización de rendimiento a 60 FPS */
+      will-change: transform, width;
+    }
+
+    .nav-btn {
+      position: relative;
+      z-index: 2;
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      user-select: none;
+      transition: color 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-btn:hover {
+      color: #FFFFFF;
+    }
+
+    .nav-btn.active {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 9999px;
+      background: #BA1A1A;
+      color: #FFFFFF;
+    }
+
+    /* ============================================================== */
+    /* 2. EFECTO 1: SCROLL ANTIGRAVEDAD (INTERSECTION OBSERVER)       */
+    /* ============================================================== */
+    .antigravity-item {
+      /* Estado Inicial: desplazado 80px hacia abajo y ligera contracción */
+      opacity: 0;
+      transform: translateY(80px) scale(0.98);
+
+      /* Transición antigravedad elástica de 0.9s */
+      transition: 
+        opacity var(--duration-scroll) var(--ease-antigravity),
+        transform var(--duration-scroll) var(--ease-antigravity);
+
+      /* Aceleración por hardware para 60fps constantes */
+      will-change: transform, opacity;
+    }
+
+    /* Estado cuando entra en el viewport */
+    .antigravity-item.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* ============================================================== */
+    /* ESTILOS DE DEMOSTRACIÓN VISUAL (LAYOUT)                        */
+    /* ============================================================== */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 40px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      background: rgba(79, 179, 217, 0.12);
+      border: 1px solid rgba(79, 179, 217, 0.25);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.15;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(79, 179, 217, 0.12);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card-tag {
+      margin-top: auto;
+      align-self: flex-start;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--accent);
+      background: rgba(79, 179, 217, 0.08);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .scroll-hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 40px 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================== -->
+  <!-- 2. NAVEGACIÓN FLOTANTE CON INDICADOR PÍLDORA                    -->
+  <!-- ============================================================== -->
+  <div class="nav-wrapper">
+    <nav class="floating-nav" aria-label="Navegación principal">
+      <!-- Indicador animado que se mueve detrás de los botones -->
+      <div class="nav-indicator" id="navIndicator"></div>
+
+      <!-- Botones de navegación -->
+      <button type="button" class="nav-btn active" data-tab="dashboard">
+        Dashboard
+      </button>
+      <button type="button" class="nav-btn" data-tab="instalaciones">
+        Instalaciones
+      </button>
+      <button type="button" class="nav-btn" data-tab="sasisopa">
+        SASISOPA
+      </button>
+      <button type="button" class="nav-btn" data-tab="alertas">
+        Alertas <span class="nav-badge">6</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="reportes">
+        Reportes
+      </button>
+    </nav>
+  </div>
+
+  <!-- Hero Header -->
+  <header class="hero antigravity-item">
+    <span class="hero-badge">Estilo Antigravedad</span>
+    <h1>Animaciones Fluidas y Suaves</h1>
+    <p>Desplazamientos ligeros sin sensación de peso con cubic-bezier(0.16, 1, 0.3, 1) e indicadores dinámicos a 60 FPS.</p>
+    <div class="scroll-hint">
+      <span>↓ Haz scroll hacia abajo para ver el efecto de entrada</span>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 1. ELEMENTOS CON EFECTO ANTIGRAVEDAD AL HACER SCROLL           -->
+  <!-- ============================================================== -->
+  <main class="container">
+    <div class="grid-cards">
+      
+      <article class="card antigravity-item">
+        <div class="card-icon">⚡</div>
+        <h3>CV-SAT Anexo 30</h3>
+        <p>Monitoreo volumétrico y balance de dispensarios en tiempo real sincronizado con el SAT.</p>
+        <span class="card-tag">STATUS: 100% ÓPTIMO</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">🛡️</div>
+        <h3>SASISOPA ASEA</h3>
+        <p>18 elementos obligatorios con trazabilidad documental, dictámenes de unidad y firmas periciales.</p>
+        <span class="card-tag">CONFORME UV-048</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">⚙️</div>
+        <h3>NOM-005 Hermeticidad</h3>
+        <p>Inspección de líneas de producto, venteos, pozos de monitoreo y pruebas anuales de tanques.</p>
+        <span class="card-tag">VIGENCIA: OCT 2027</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">🧪</div>
+        <h3>NOM-016 Calidad CRE</h3>
+        <p>Muestreo y análisis de densidad, azufre y octanaje con laboratorios acreditados ante la EMA.</p>
+        <span class="card-tag">LAB-CRE-881</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">🔥</div>
+        <h3>NOM-018 HDS & SGA</h3>
+        <p>Hojas de datos de seguridad, pictogramas de identificación y matriz de riesgo laboral.</p>
+        <span class="card-tag">STPS-VERIFICADO</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">📁</div>
+        <h3>Bóveda Criptográfica</h3>
+        <p>Almacenamiento inmutable con estampas de tiempo SHA-256 para auditorías federales.</p>
+        <span class="card-tag">SHA-STAMP: OK</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">📊</div>
+        <h3>Telemetría Continua</h3>
+        <p>Monitoreo de latencia y estado de conexión satelital para estaciones remotas.</p>
+        <span class="card-tag">LATENCIA: 32ms</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">🔔</div>
+        <h3>Centro de Alertas</h3>
+        <p>Detección anticipada de desviaciones volumétricas y vencimientos normativos a 30 días.</p>
+        <span class="card-tag">RESOLUCIÓN ACTIVA</span>
+      </article>
+
+      <article class="card antigravity-item">
+        <div class="card-icon">📅</div>
+        <h3>Calendario de Inspecciones</h3>
+        <p>Programación automatizada de visitas de UV autorizadas y simulacros de emergencia.</p>
+        <span class="card-tag">PRÓXIMO: 14 NOV</span>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT: LÓGICA OPTIMIZADA                                  -->
+  <!-- ============================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ------------------------------------------------------------ */
+      /* 1. SCROLL ANTIGRAVEDAD CON INTERSECTION OBSERVER             */
+      /* ------------------------------------------------------------ */
+      const scrollItems = document.querySelectorAll('.antigravity-item');
+
+      const observerOptions = {
+        root: null, // Viewport del navegador
+        rootMargin: '0px 0px -60px 0px', // Se activa un poco antes de llegar para fluidez
+        threshold: 0.15 // 15% visible para disparar la animación
+      };
+
+      const antigravityObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Activa el flotado suave
+            entry.target.classList.add('is-visible');
+
+            // Optimización: Limpieza de GPU una vez completada la transición
+            entry.target.addEventListener('transitionend', function handler(e) {
+              if (e.propertyName === 'transform') {
+                entry.target.style.willChange = 'auto';
+                entry.target.removeEventListener('transitionend', handler);
+              }
+            });
+
+            // Dejamos de observar este elemento para liberar recursos (60 FPS)
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      scrollItems.forEach((item, index) => {
+        // Opcional: Micro-staggering si varios items están en la misma fila inicial
+        item.style.transitionDelay = `${(index % 3) * 0.08}s`;
+        antigravityObserver.observe(item);
+      });
+
+
+      /* ------------------------------------------------------------ */
+      /* 2. MENÚ DE NAVEGACIÓN CON INDICADOR FLOTANTE                 */
+      /* ------------------------------------------------------------ */
+      const nav = document.querySelector('.floating-nav');
+      const indicator = document.getElementById('navIndicator');
+      const buttons = nav.querySelectorAll('.nav-btn');
+
+      /**
+       * Mueve el indicador flotante al botón seleccionado
+       * calculando su offsetLeft y offsetWidth exactos.
+       */
+      function updateIndicator(targetBtn) {
+        if (!targetBtn || !indicator) return;
+
+        // Medidas del botón respecto al contenedor nav
+        const left = targetBtn.offsetLeft;
+        const width = targetBtn.offsetWidth;
+
+        // Desplazamiento y redimensión por hardware (GPU)
+        indicator.style.width = `${width}px`;
+        indicator.style.transform = `translateX(${left}px)`;
+
+        // Actualización de estado activo
+        buttons.forEach(btn => btn.classList.remove('active'));
+        targetBtn.classList.add('active');
+      }
+
+      // Asignar eventos de clic a cada botón
+      buttons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          updateIndicator(e.currentTarget);
+        });
+      });
+
+      // Inicializar el indicador en el botón activo al cargar
+      const initialActive = nav.querySelector('.nav-btn.active') || buttons[0];
+      // Pequeño timeout para asegurar que las fuentes/medidas estén computadas
+      requestAnimationFrame(() => updateIndicator(initialActive));
+
+      // Mantener alineación si la ventana cambia de tamaño (Responsive)
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        cancelAnimationFrame(resizeTimer);
+        resizeTimer = requestAnimationFrame(() => {
+          const currentActive = nav.querySelector('.nav-btn.active');
+          updateIndicator(currentActive);
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

@@ -80,13 +80,36 @@
   --font-headline-lg: "Outfit", sans-serif;
 }
 
+@utility pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+@utility pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'IBM Plex Sans', sans-serif;
   overscroll-behavior: none;
   background-color: var(--color-surface);
 }
 
-h1, h2, h3, h4, .font-heading {
+h1,
+h2,
+h3,
+h4,
+.font-heading {
   font-family: 'Outfit', sans-serif;
 }
 
@@ -94,6 +117,256 @@ h1, h2, h3, h4, .font-heading {
   font-family: 'IBM Plex Mono', monospace;
 }
 
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animaciones Estilo Antigravedad */
+@keyframes antigravityPop {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-antigravity-pop {
+  animation: antigravityPop 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 1. Efecto Antigravedad al hacer scroll */
+.antigravity-item {
+  opacity: 0;
+  transform: translateY(80px) scale(0.98);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.antigravity-item.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@keyframes svgStrokeDraw {
+  0% {
+    stroke-dashoffset: var(--stroke-from, 60);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: var(--stroke-to, 0);
+    opacity: 1;
+  }
+}
+
+.animate-svg-draw {
+  animation: svgStrokeDraw var(--draw-duration, 460ms) cubic-bezier(0.22, 1, 0.36, 1) var(--draw-delay, 0ms) both;
+}
+
+/* ========================================================================== */
+/* SISTEMA GLOBAL DE ANIMACIONES Y MICROINTERACCIONES SUELVO                  */
+/* ========================================================================== */
+
+@keyframes suelvoFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-y, 14px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes suelvoProgressFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes suelvoAnimateIn {
+  from {
+    opacity: var(--suelvo-enter-opacity, 1);
+    transform: translate3d(
+      var(--suelvo-enter-x, 0),
+      var(--suelvo-enter-y, 0),
+      0
+    ) scale(var(--suelvo-enter-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Compatibilidad nativa para modales, popovers, toasts y acordeones (animate-in) */
+.animate-in {
+  animation: suelvoAnimateIn var(--tw-duration, 200ms) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.fade-in { --suelvo-enter-opacity: 0; }
+.zoom-in { --suelvo-enter-scale: 0.96; }
+.zoom-in-95 { --suelvo-enter-scale: 0.95; }
+.slide-in-from-top-1 { --suelvo-enter-y: -6px; }
+.slide-in-from-bottom { --suelvo-enter-y: 24px; }
+.slide-in-from-bottom-3 { --suelvo-enter-y: 12px; }
+.duration-250 { --tw-duration: 250ms; }
+
+/* Scroll Reveal: aparición fluida GPU al entrar al viewport (sin re-renderizado) */
+[data-scroll-reveal="pending"] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+[data-scroll-reveal="visible"] {
+  --reveal-duration: 420ms;
+  --reveal-y: 14px;
+  animation: suelvoFadeSlideUp var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) backwards;
+}
+
+tr[data-scroll-reveal="visible"] {
+  --reveal-duration: 320ms;
+  --reveal-y: 9px;
+}
+
+[data-scroll-reveal="done"] {
+  will-change: auto;
+}
+
+/* Pausar trazos SVG y barras horizontales hasta entrar al campo de visión */
+[data-scroll-reveal="pending"] .animate-svg-draw,
+[data-scroll-reveal="pending"] .suelvo-progress-fill,
+[data-scroll-reveal="pending"] .suelvo-bar-rise,
+[data-scroll-draw="pending"].animate-svg-draw,
+[data-scroll-draw="pending"] .animate-svg-draw,
+[data-scroll-draw="pending"].suelvo-progress-fill,
+[data-scroll-draw="pending"] .suelvo-progress-fill,
+[data-scroll-draw="pending"].suelvo-bar-rise,
+[data-scroll-draw="pending"] .suelvo-bar-rise {
+  animation-play-state: paused !important;
+}
+
+@keyframes suelvoBarRise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.suelvo-bar-rise {
+  transform-origin: bottom center;
+  animation: suelvoBarRise 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--bar-delay, 120ms) both;
+}
+
+/* Llenado progresivo de barras horizontales (pausado en pending desde transform: scaleX(0)) */
+.suelvo-progress-fill {
+  transform-origin: left center;
+  animation: suelvoProgressFill 680ms cubic-bezier(0.22, 1, 0.36, 1) var(--draw-delay, 140ms) both;
+}
+
+/* Microinteracciones táctiles globales */
+.suelvo-app-shell button:not(:disabled),
+.suelvo-app-shell select,
+.suelvo-app-shell input {
+  transition-property: background-color, border-color, color, box-shadow, opacity, scale, translate;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.suelvo-app-shell button:not(:disabled):not([data-no-press]):active {
+  scale: 0.982;
+}
+
+.suelvo-hover-card {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.suelvo-hover-card:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 10px 24px -10px rgba(12, 43, 58, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-svg-draw {
+    animation: none !important;
+    stroke-dashoffset: var(--stroke-to, 0) !important;
+    opacity: 1 !important;
+  }
+  .animate-in,
+  .animate-fade-in-up,
+  .animate-antigravity-pop,
+  [data-scroll-reveal],
+  [data-scroll-draw],
+  .suelvo-progress-fill,
+  .suelvo-bar-rise {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .suelvo-hover-card,
+  .suelvo-app-shell button,
+  .suelvo-app-shell select,
+  .suelvo-app-shell input {
+    transition: none !important;
+  }
 }
